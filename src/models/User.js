@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 
 const UserSchema = new mongoose.Schema({
   name: {
@@ -31,6 +32,33 @@ const UserSchema = new mongoose.Schema({
     required: [true, 'please provide a password'],
     minlength: 6,
   },
+});
+
+// To extract and move password hashing from controllers (in order to not repeat ourselves),
+// we can go with "PRE" HOOK that can be used on any Mongoose Schema.
+// This hook is basically a middleware that accepts 2 arguments:
+// 1) query method (in our case we use "save" that saves the document by inserting
+// a new document into the database);
+// 2) callback function that is executed BEFORE execution of query method (so we can put some useful
+// logic here e.g. password hashing)
+// eslint-disable-next-line prefer-arrow-callback
+UserSchema.pre('save', async function () {
+  // In order to solve the problem of NON-ENCODED passwords we need to hash the password (which is
+  // one-way operation i.e. it cannot be reversed) or in other words to ENCODE it such
+  // that as a result "password" field of the document in MongoDB will hold some gibberish.
+  // "salt" is random data that is used as an additional input to a one-way function
+  // that hashes data, a password or passphrase.
+  // To create salt we use "genSalt" method that accepts "number of rounds" which is basically
+  // telling this method how much random data we want to add to the hashed password
+  const salt = await bcrypt.genSalt(10);
+  // to create hashed password(which is safe to store in DB) we use "hash" method (notice that
+  // we use "this.password" because it will have the plain text password value from the request)
+  // and store it in "this.password" of the UserSchema:
+  this.password = await bcrypt.hash(this.password, salt);
+  // IMPORTANT! In order go to the next middleware in chain, and effectively finish creating
+  // new document in MongoDB by now we have 2 options:
+  // - we pass "next" to callback function AND call it explicitly (i.e. next())
+  // - we don't pass "next" to callback at all AND it will be called implicitly anyway
 });
 
 module.exports = mongoose.model('User', UserSchema);
