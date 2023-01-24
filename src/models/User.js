@@ -77,4 +77,12 @@ UserSchema.methods.createJWT = function () {
   );
 };
 
+// here we add one more instance method that will compare newly provided and hashed
+// one with the stored one (which is of course also hashed):
+UserSchema.methods.comparePasswords = async function (providedPassword) {
+  const isMatch = await bcrypt.compare(providedPassword, this.password);
+
+  return isMatch;
+};
+
 module.exports = mongoose.model('User', UserSchema);
