@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 const UserSchema = new mongoose.Schema({
   name: {
@@ -60,5 +61,20 @@ UserSchema.pre('save', async function () {
   // - we pass "next" to callback function AND call it explicitly (i.e. next())
   // - we don't pass "next" to callback at all AND it will be called implicitly anyway
 });
+
+// we can add methods to Schema instances by adding properties to "methods" field
+// By the way we use function expression with "function" keyword and not an arrow function
+// because we want "this" pointer to point at the Schema instance, and as we know
+// we CANNOT USE ARROW FUNCTIONS AS AN OBJECT METHOD!!! And in our case "methods" is AN OBJECT!
+UserSchema.methods.createJWT = function () {
+  return jwt.sign(
+    // eslint-disable-next-line no-underscore-dangle
+    { userId: this._id, name: this.name },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: '30d',
+    },
+  );
+};
 
 module.exports = mongoose.model('User', UserSchema);

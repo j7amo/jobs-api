@@ -1,4 +1,5 @@
 const { StatusCodes } = require('http-status-codes');
+require('dotenv').config();
 const User = require('../models/User');
 // for "Register User" flow we want to:
 // 1) Validate data with "Mongoose"
@@ -20,7 +21,13 @@ const registerUser = async (req, res) => {
   // then user passwords are basically already stolen.
   // const user = await User.create(req.body);
   const user = await User.create({ ...req.body });
-  res.status(StatusCodes.CREATED).json(user);
+  // to create a token we now use instance method that we defined in User model:
+  const token = user.createJWT();
+  // We decide what exactly we send back to the client based on what is the CONTRACT
+  // between server and client. In this case we are sending back an object with:
+  // - user field(because client needs this for showing username);
+  // - token field(which is mandatory if we want to authorize user in the future).
+  res.status(StatusCodes.CREATED).json({ user: { name: user.name }, token });
 };
 
 const loginUser = async (req, res) => {
