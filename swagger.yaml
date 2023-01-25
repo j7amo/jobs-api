@@ -51,10 +51,10 @@ paths:
               allOf:
                 - $ref: '#/components/schemas/LoginuserRequest'
                 - example:
-                    email: roman.tarnakin@gmail.com
+                    email: awdwefre@sdlvkfr.com
                     password: '123456'
             example:
-              email: roman.tarnakin@gmail.com
+              email: awdwefre@sdlvkfr.com
               password: '123456'
         required: true
       responses:
@@ -197,7 +197,7 @@ components:
         password:
           type: string
       example:
-        email: roman.tarnakin@gmail.com
+        email: awdwefre@sdlvkfr.com
         password: '123456'
     CreateajobRequest:
       title: CreateajobRequest
