@@ -46,6 +46,10 @@ app.use(cors());
 // We use "XSS" middleware to sanitize user input coming from POST body, GET queries, and url params
 app.use(xss());
 
+// just to be able to quickly check if application is successfully deployed
+// we set up a simple route
+app.get('/', (req, res) => res.send('Welcome to Jobs API'));
+
 // routes
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/jobs', authenticationMiddleware, jobsRouter);
